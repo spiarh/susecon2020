@@ -1,0 +1,124 @@
+#% l3-labels-based
+#% l3-service-based
+#% l4 
+#% kubernetes-namespace
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress"
+metadata:
+  name: "ingress-loki"
+  namespace: logging
+spec:
+  endpointSelector:
+    matchLabels:
+      app: loki
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "monitoring"
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+        "component": "server"
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"
+    - matchLabels:
+        #"io.kubernetes.pod.namespace": "logging"
+        "app": "promtail"
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress"
+metadata:
+  name: "egress-loki"
+  namespace: logging
+spec:
+  endpointSelector:
+    matchLabels:
+      app: loki
+  egress:
+  # TODO: check why loki fetch apiserver
+  - toServices:
+    - k8sService:
+        serviceName: kubernetes
+        namespace: default
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "kube-system"
+        "k8s:k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress"
+metadata:
+  name: "ingress-promtail"
+  namespace: logging
+spec:
+  endpointSelector:
+    matchLabels:
+      app: promtail
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+        "component": "server"
+      toPorts:
+      - ports:
+        - port: "3101"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to loki, apiserver, dns"
+metadata:
+  name: "egress-promtail"
+  namespace: logging
+spec:
+  endpointSelector:
+    matchLabels:
+      app: promtail
+  egress:
+  - toServices:
+    - k8sService:
+        serviceName: kubernetes
+        namespace: default
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "kube-system"
+        "k8s:k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+    - matchLabels:
+        #"k8s:io.kubernetes.pod.namespace": "logging"
+        "app": "loki"
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP

@@ -1,0 +1,37 @@
+adminPassword: susecon
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - access: proxy
+      isDefault: true
+      name: Prometheus
+      orgId: 1
+      type: prometheus
+      url: http://prometheus-server.monitoring.svc.cluster.local
+    - access: proxy
+      isDefault: false
+      name: Loki
+      orgId: 1
+      type: loki
+      url: http://loki.logging.svc.cluster.local:3100
+    deleteDatasources:
+    - name: Prometheus
+      orgId: 1
+    - name: Loki
+      orgId: 1
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClassName: local-path
+rbac:
+  create: true
+#service:
+#  nodePort: 30030
+#  servicePort: 80
+#  type: NodePort
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard

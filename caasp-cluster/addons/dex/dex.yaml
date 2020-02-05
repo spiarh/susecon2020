@@ -1,0 +1,174 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: oidc-dex
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-dex-config
+  namespace: kube-system
+data:
+  config.yaml: |
+    issuer: https://10.17.2.0:32000
+
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+
+    web:
+      https: 0.0.0.0:32000
+      tlsCert: /etc/dex/pki/tls.crt
+      tlsKey: /etc/dex/pki/tls.key
+      tlsClientCA: /etc/dex/pki/ca.crt
+
+    frontend:
+      issuer: "SUSE CaaS Platform"
+      theme: "caasp"
+      dir: /usr/share/caasp-dex/web
+
+    # This is a sample with LDAP as connector.
+    # Requires a update to fulfill your environment.
+    connectors:
+    - type: ldap
+      id: ldap
+      name: openLDAP
+      config:
+        host: openldap.kube-system.svc.cluster.local:389
+        insecureNoSSL: true
+        insecureSkipVerify: true
+        bindDN: cn=admin,dc=example,dc=com
+        bindPW: admin
+        usernamePrompt: Email Address
+        userSearch:
+          baseDN: cn=Users,dc=example,dc=com
+          filter: "(objectClass=person)"
+          username: mail
+          idAttr: DN
+          emailAttr: mail
+          nameAttr: cn
+        groupSearch:
+          baseDN: cn=Groups,dc=example,dc=com
+          filter: "(objectClass=group)"
+          userAttr: DN
+          groupAttr: member
+          nameAttr: cn
+
+    oauth2:
+      skipApprovalScreen: true
+
+    staticClients:
+    - id: oidc
+      redirectURIs:
+      - 'https://10.17.2.0:32001/callback'
+      name: 'OIDC'
+      secret: 8b495419fe86c671f133c825
+      trustedPeers:
+      - oidc-cli
+    - id: oidc-cli
+      public: true
+      redirectURIs:
+      - 'urn:ietf:wg:oauth:2.0:oob'
+      name: 'OIDC CLI'
+      secret: swac7qakes7AvucH8bRucucH
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oidc-dex
+  namespace: kube-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: oidc-dex
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      name: oidc-dex
+      labels:
+        app: oidc-dex
+      annotations:
+        addon.caasp.suse.com/manifest-version: "2.16.0-3"
+    spec:
+      serviceAccountName: oidc-dex
+      containers:
+      - name: oidc-dex
+        image: registry.suse.com/caasp/v4/caasp-dex:2.16.0
+        imagePullPolicy: IfNotPresent
+        command:
+          - /usr/bin/caasp-dex
+          - serve
+          - /etc/dex/cfg/config.yaml
+        ports:
+          - name: https
+            containerPort: 32000
+        volumeMounts:
+          - name: dex-config-path
+            mountPath: /etc/dex/cfg
+          - name: dex-cert-path
+            mountPath: /etc/dex/pki
+      volumes:
+      - name: dex-config-path
+        configMap:
+          name: oidc-dex-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+      - name: dex-cert-path
+        secret:
+          secretName: oidc-dex-cert
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oidc-dex
+  namespace: kube-system
+spec:
+  selector:
+    app: oidc-dex
+  type: NodePort
+  ports:
+  - name: https
+    port: 32000
+    targetPort: 32000
+    nodePort: 32000
+    protocol: TCP
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: oidc-dex
+  namespace: kube-system
+rules:
+# Follow upstream example https://github.com/dexidp/dex/blob/4bede5eb80822fc3a7fc9edca0ed2605cd339d17/examples/k8s/dex.yaml#L116-L126
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create"]
+- apiGroups: ["dex.coreos.com"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: oidc-dex
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: oidc-dex
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: oidc-dex
+  namespace: kube-system

@@ -1,0 +1,42 @@
+#% l3-labels-based
+#% l4
+#% l7-http
+#% kubernetes-serviceaccount
+#% kubernetes-namespace
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from webapp and metrics"
+metadata:
+  name: "ingress-webapp-metrics"
+  namespace: mariadb
+spec:
+  endpointSelector:
+    matchLabels:
+      app: mariadb
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "nextcloud"
+        "app.kubernetes.io/instance": "nextcloud"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "prestashop"
+        "app": "prestashop"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+    toPorts:
+    - ports:
+      - port: "3306"
+        protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        io.cilium.k8s.policy.serviceaccount: prometheus-server
+      toPorts:
+      - ports:
+        - port: "9104"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"

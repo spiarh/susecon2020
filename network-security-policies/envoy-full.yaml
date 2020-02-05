@@ -1,0 +1,115 @@
+#% l3-labels-based
+#% l4 
+#% kubernetes-namespace
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from outside"
+metadata:
+  name: "ingress-all"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  ingress:
+  #- fromEndpoints:
+  #  - {}
+  - toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+      - port: "443"
+        protocol: TCP
+      - port: "3306"
+        protocol: TCP
+      - port: "9901"
+        protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to HTTP backends"
+metadata:
+  name: "egress-http"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "nextcloud"
+        "app.kubernetes.io/instance": "nextcloud"
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "prestashop"
+        "app": "prestashop"
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "grafana"
+      toPorts:
+      - ports:
+        - port: "3000"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+      toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "kube-system"
+        "k8s-app": "hubble-ui"
+      toPorts:
+      - ports:
+        - port: "12000"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to MYSQL backend"
+metadata:
+  name: "egress-mysql"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "mariadb"
+        "app": "mariadb"
+      toPorts:
+      - ports:
+        - port: "3306"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to DNS service"
+metadata:
+  name: "egress-dns"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "kube-system"
+        "k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY

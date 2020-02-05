@@ -1,0 +1,12 @@
+---
+# Source: envoy/templates/xds.configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envoy-xds
+  labels:
+    app: envoy
+    chart: envoy-1.9.0
+    release: envoy
+    heritage: Tiller
+data:

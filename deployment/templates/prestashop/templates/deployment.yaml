@@ -1,0 +1,136 @@
+---
+# Source: prestashop/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prestashop
+  labels:
+    app: "prestashop"
+    chart: "prestashop-9.1.3"
+    release: "prestashop"
+    heritage: "Tiller"
+spec:
+  selector:
+    matchLabels:
+      app: prestashop
+      release: "prestashop"
+  template:
+    metadata:
+      labels:
+        app: "prestashop"
+        chart: "prestashop-9.1.3"
+        release: "prestashop"
+      annotations:
+        prometheus.io/port: "9117"
+        prometheus.io/scrape: "true"
+        
+    spec:      
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "status.localhost"
+      containers:
+      - name: prestashop
+        image: docker.io/bitnami/prestashop:1.7.6-3-debian-9-r0
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: PRESTASHOP_COOKIE_CHECK_IP
+          value: "no"
+        - name: PRESTASHOP_COUNTRY
+          value: "us"
+        - name: PRESTASHOP_LANGUAGE
+          value: "en"
+        - name: MARIADB_HOST
+          value: "mariadb.mariadb.svc.cluster.local"
+        - name: MARIADB_PORT_NUMBER
+          value: "3306"
+        - name: PRESTASHOP_DATABASE_NAME
+          value: "prestashop"
+        - name: PRESTASHOP_DATABASE_USER
+          value: "prestashop"
+        - name: PRESTASHOP_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: prestashop-externaldb
+              key: db-password
+        - name: PRESTASHOP_HOST
+          value: "prestashop.susecon.lab"
+        - name: PRESTASHOP_USERNAME
+          value: "user@example.com"
+        - name: PRESTASHOP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: prestashop
+              key: prestashop-password
+        - name: PRESTASHOP_EMAIL
+          value: "susecon@suse.com"
+        - name: PRESTASHOP_FIRST_NAME
+          value: "Suse"
+        - name: PRESTASHOP_LAST_NAME
+          value: "Con"
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: http
+            httpHeaders:
+            - name: Host
+              value: "prestashop.susecon.lab"
+          initialDelaySeconds: 600
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: http
+            httpHeaders:
+            - name: Host
+              value: "prestashop.susecon.lab"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 6
+        resources:
+          requests:
+            cpu: 300m
+            memory: 512Mi
+          
+        volumeMounts:
+        - mountPath: /bitnami/prestashop
+          name: prestashop-data
+          subPath: prestashop
+      - name: metrics
+        image: docker.io/bitnami/apache-exporter:0.7.0-debian-9-r168
+        imagePullPolicy: "IfNotPresent"
+        command: [ '/bin/apache_exporter', '-scrape_uri', 'http://status.localhost:80/server-status/?auto']
+        ports:
+        - name: metrics
+          containerPort: 9117
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+            null
+            
+      volumes:
+      - name: prestashop-data
+        persistentVolumeClaim:
+          claimName: prestashop-prestashop

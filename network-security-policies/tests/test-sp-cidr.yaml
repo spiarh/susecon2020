@@ -1,0 +1,24 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "cidr-rule"
+  namespace: "tblshoot"
+spec:
+  endpointSelector:
+    matchLabels:
+      app: tblshoot
+  ingress:
+  - fromCIDR:
+    - 0.0.0.0/0
+  egress:
+  - toEndpoints:
+    - matchLabels:
+          "k8s:io.kubernetes.pod.namespace": kube-system
+          "k8s:k8s-app": kube-dns
+  - toCIDR:
+    - 149.0.0.0/8
+#  - toCIDRSet:
+#    - cidr: 10.0.0.0/8
+#      except:
+#      - 10.96.0.0/12

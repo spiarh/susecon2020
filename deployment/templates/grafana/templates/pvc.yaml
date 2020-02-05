@@ -1,0 +1,23 @@
+---
+# Source: grafana/templates/pvc.yaml
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+    chart: grafana-4.3.2
+    release: grafana
+    heritage: Tiller
+  finalizers:
+    - kubernetes.io/pvc-protection
+    
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "5Gi"
+  storageClassName: local-path

@@ -1,0 +1,30 @@
+---
+# Source: mariadb/templates/master-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  labels:
+    app: "mariadb"
+    component: "master"
+    chart: "mariadb-7.3.5"
+    release: "mariadb"
+    heritage: "Tiller"
+  annotations:
+    prometheus.io/port: "9104"
+    prometheus.io/scrape: "true"
+    
+spec:
+  type: NodePort
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: mysql
+    nodePort: 30006
+  - name: metrics
+    port: 9104
+    targetPort: metrics
+  selector:
+    app: "mariadb"
+    component: "master"
+    release: "mariadb"

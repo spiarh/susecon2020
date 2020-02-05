@@ -1,0 +1,19 @@
+---
+# Source: mariadb/templates/role.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mariadb
+  labels:
+    app: "mariadb"
+    chart: "mariadb-7.3.5"
+    release: "mariadb"
+    heritage: "Tiller"
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - endpoints
+  verbs:
+    - get

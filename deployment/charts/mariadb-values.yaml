@@ -1,0 +1,34 @@
+image:
+  registry: docker.io
+  repository: bitnami/mariadb
+  tag: 10.1.43-debian-9-r66
+#  tag: 10.2.30-debian-9-r37
+
+service:
+  type: "NodePort"
+  nodePort:
+    master: 30006
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+rootUser:
+  password: "susecon"
+  forcePassword: true
+
+replication:
+  enabled: false
+
+master:
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+
+metrics:
+  enabled: true
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9104"

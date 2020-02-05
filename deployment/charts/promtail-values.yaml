@@ -1,0 +1,15 @@
+---
+loki:
+  serviceName: "loki.logging.svc.cluster.local"
+  servicePort: 3100
+  serviceScheme: http
+
+volumes:
+- name: pods
+  hostPath:
+    path: /var/log/pods
+
+volumeMounts:
+- name: pods
+  mountPath: /var/log/pods
+  readOnly: true

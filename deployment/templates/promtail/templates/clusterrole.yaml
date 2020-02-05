@@ -1,0 +1,22 @@
+---
+# Source: promtail/templates/clusterrole.yaml
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    app: promtail
+    chart: promtail-0.19.1
+    release: promtail
+    heritage: Tiller
+  name: promtail-clusterrole
+  namespace: logging
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "watch", "list"]

@@ -1,0 +1,249 @@
+replicaCount: 1
+
+service:
+  enabled: true
+  name: envoy
+  type: ClusterIP
+  ports:
+    n0:
+      port: 80
+      targetPort: n0
+      protocol: TCP
+    n1:
+      port: 443
+      targetPort: n1
+      protocol: TCP
+    n2:
+      port: 3306
+      targetPort: n2
+      protocol: TCP
+
+ports:
+  admin:
+    containerPort: 9901
+    protocol: TCP
+  n0:
+    containerPort: 80
+    protocol: TCP
+  n1:
+    containerPort: 443
+    protocol: TCP
+  n2:
+    containerPort: 3306
+    protocol: TCP
+
+secretMounts:
+  secret:
+    secretName: envoy-tls
+    mountPath: /secrets
+
+files:
+  envoy.yaml: |-
+    admin:
+      access_log_path: /dev/stdout
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9901
+
+    static_resources:
+      listeners:
+      - name: listener_http
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 80
+        filter_chains:
+        - filters:
+          - name: envoy.http_connection_manager
+            config:
+              codec_type: auto
+              stat_prefix: ingress_http
+              route_config:
+                virtual_hosts:
+                - name: backend
+                  domains:
+                  - prestashop.susecon.lab
+                  - nextcloud.susecon.lab
+                  - prometheus.susecon.lab
+                  - grafana.susecon.lab
+                  - hubble.susecon.lab
+                  - envoy.susecon.lab
+                  routes:
+                  - match:
+                      prefix: "/"
+                    redirect:
+                      path_redirect: "/"
+                      https_redirect: true
+              http_filters:
+              - name: envoy.router
+                config: {}
+      - name: listener_https
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 443
+        filter_chains:
+        - filters:
+          - name: envoy.http_connection_manager
+            #config:
+            typed_config:
+              "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
+              access_log:
+              - name: envoy.file_access_log
+                config:
+                  path: /dev/stdout
+              stat_prefix: ingress_http
+              route_config:
+                name: local_route
+                virtual_hosts:
+                - name: local_service_prestashop
+                  domains: ["prestashop.susecon.lab"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_prestashop
+                - name: local_service_nextcloud
+                  domains: ["nextcloud.susecon.lab"]
+                  #domains: ["*"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_nextcloud
+                - name: local_service_prometheus
+                  domains: ["prometheus.susecon.lab"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_prometheus
+                - name: local_service_grafana
+                  domains: ["grafana.susecon.lab"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_grafana
+                - name: local_service_hubble
+                  domains: ["hubble.susecon.lab"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_hubble
+                - name: local_service_envoy
+                  domains: ["envoy.susecon.lab"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      path_redirect: "/"
+                      cluster: service_envoy
+              http_filters:
+              - name: envoy.router
+          #use_proxy_proto: true
+          tls_context:
+            common_tls_context:
+              tls_certificates:
+                - certificate_chain:
+                    filename: "/secrets/tls.crt"
+                  private_key:
+                    filename: "/secrets/tls.key"
+        #- transport_socket:
+        #    name: envoy.transport_sockets.tls
+        #    typed_config:
+        #      "@type": type.googleapis.com/envoy.api.v2.auth.DownstreamTlsContext
+        #      common_tls_context:
+        #        alpn_protocols: h2,http/1.1
+        #        tls_certificates:
+        #        - certificate_chain:
+        #            filename: "/secrets/tls.crt"
+        #          private_key:
+        #            filename: "/secrets/tls.key"
+      - name: listener_mariadb
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 3306
+        filter_chains:
+        - filters:
+          - name: envoy.filters.network.mysql_proxy
+            typed_config:
+              "@type": type.googleapis.com/envoy.config.filter.network.mysql_proxy.v1alpha1.MySQLProxy
+              stat_prefix: mysql
+          - name: envoy.tcp_proxy
+            typed_config:
+              "@type": type.googleapis.com/envoy.config.filter.network.tcp_proxy.v2.TcpProxy
+              stat_prefix: tcp
+              cluster: service_mariadb
+      clusters:
+      - name: service_prestashop
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: prestashop.prestashop.svc.cluster.local
+              port_value: 80
+      - name: service_nextcloud
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: nextcloud.nextcloud.svc.cluster.local
+              port_value: 80
+      - name: service_prometheus
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: prometheus-server.monitoring.svc.cluster.local
+              port_value: 80
+      - name: service_grafana
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: grafana.monitoring.svc.cluster.local
+              port_value: 80
+      - name: service_mariadb
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: mariadb.mariadb.svc.cluster.local
+              port_value: 3306
+      - name: service_hubble
+        connect_timeout: 0.25s
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: hubble-ui.kube-system.svc.cluster.local
+              port_value: 12000
+      - name: service_envoy
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: localhost
+              port_value: 9901

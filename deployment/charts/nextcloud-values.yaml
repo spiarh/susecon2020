@@ -1,0 +1,31 @@
+nextcloud:
+  host: nextcloud.susecon.lab
+  username: admin
+  password: susecon
+
+  configs:
+    rproxy-ssl.config.php: |-
+      <?php
+      $CONFIG = array (
+        'overwritehost'     => 'nextcloud.susecon.lab',
+        'overwriteprotocol' => 'https',
+      );
+
+service:
+  type: ClusterIP
+  port: 80
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: mysql
+  host: mariadb.mariadb.svc.cluster.local
+  user: nextcloud
+  password: nextcloud
+  database: nextcloud
+
+persistence:
+  enabled: true
+  storageClass: local-path

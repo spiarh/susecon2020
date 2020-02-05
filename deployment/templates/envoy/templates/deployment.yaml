@@ -1,0 +1,110 @@
+---
+# Source: envoy/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy
+  labels:
+    app: envoy
+    chart: envoy-1.9.0
+    release: envoy
+    heritage: Tiller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy
+      release: envoy
+  strategy:
+    
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+    
+  template:
+    metadata:
+      labels:
+        app: envoy
+        release: envoy
+        component: controller
+      annotations:
+        checksum/config: 36735a43a616aa7d4d7f681c0ec60347e89071ebaba7aa8a4bc0eb38b6ca4674
+    spec:
+      securityContext:
+        
+        {}
+        
+      terminationGracePeriodSeconds: 30
+      containers:
+
+        - name: envoy
+          image: "envoyproxy/envoy:v1.11.1"
+          imagePullPolicy: IfNotPresent
+          command:
+            
+            - /usr/local/bin/envoy
+            
+          args:
+            
+            - -l
+            - $loglevel
+            - -c
+            - /config/envoy.yaml
+            
+          ports:
+            - name: admin
+              
+              containerPort: 9901
+              protocol: TCP
+              
+            - name: n0
+              
+              containerPort: 80
+              protocol: TCP
+              
+            - name: n1
+              
+              containerPort: 443
+              protocol: TCP
+              
+            - name: n2
+              
+              containerPort: 3306
+              protocol: TCP
+              
+
+          livenessProbe:
+            
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: admin
+            
+          readinessProbe:
+            
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: admin
+            
+          env:
+          resources:
+            
+            {}
+            
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: secret
+              mountPath: /secrets
+          lifecycle:
+            
+            null
+            
+      volumes:
+        - name: config
+          configMap:
+            name: envoy
+        - name: secret
+          secret:
+            secretName: envoy-tls
+            defaultMode: 

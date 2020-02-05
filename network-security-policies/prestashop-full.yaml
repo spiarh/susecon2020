@@ -1,0 +1,63 @@
+#% l3-labels-based
+#% l4
+#% l7-http
+#% kubernetes-namespace
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from envoy and metrics"
+metadata:
+  name: "ingress-prestashop"
+  namespace: prestashop
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prestashop
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+        "component": "server"
+      toPorts:
+      - ports:
+        - port: "9117"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to DNS service and MariaDB"
+metadata:
+  name: "egress-prestashop"
+  namespace: prestashop
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prestashop
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "mariadb"
+        "k8s:app": "mariadb"
+      toPorts:
+      - ports:
+        - port: "3306"
+          protocol: TCP
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "kube-system"
+        "k8s:k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY

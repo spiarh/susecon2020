@@ -1,0 +1,188 @@
+#% l3-labels-based
+#% l3-service-based
+#% l4 
+#% kubernetes-namespace
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from envoy"
+metadata:
+  name: "ingress-grafana"
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: grafana
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+      toPorts:
+      - ports:
+        - port: "3000"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to DB backends"
+metadata:
+  name: "egress-grafana"
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: grafana
+  egress:
+  # TODO: check why grafana fetch apiserver
+  - toServices:
+    - k8sService:
+        serviceName: kubernetes
+        namespace: default
+  #- toCIDR:
+  #  - 172.16.0.0/22
+  #  #DOEST NOT WORK
+  #  toPorts:
+  #  - ports:
+  #    - port: "6443"
+  #      protocol: ANY
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "kube-system"
+        "k8s:k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+      toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "logging"
+        "app": "loki"
+      toPorts:
+      - ports:
+        - port: "3100"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress"
+metadata:
+  name: "ingress-prometheus"
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prometheus
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "grafana"
+    - toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to fetch metrics"
+metadata:
+  name: "egress-prometheus"
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prometheus
+      component: server
+  egress:
+  - toServices:
+    - k8sService:
+        serviceName: kubernetes
+        namespace: default
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": "kube-system"
+        "k8s:k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+  - toPorts:
+    - ports:
+      # Loki
+      - port: "3100"
+        protocol: TCP
+      # Promtail
+      - port: "3101"
+        protocol: TCP
+      # apiserver
+      - port: "6443"
+        protocol: TCP
+      # Hubble
+      - port: "6943"
+        protocol: TCP
+      # kube-state-metrics
+      - port: "8080"
+        protocol: TCP
+      # kube-state-metrics
+      - port: "8081"
+        protocol: TCP
+      # mariadb
+      - port: "9104"
+        protocol: TCP
+      # prestashop
+      - port: "9117"
+        protocol: TCP
+      # kube-dns
+      - port: "9153"
+        protocol: TCP
+      #rules:
+      #  http:
+      #  - method: "GET"
+      #    #path: "/metrics"
+      #    path: ""
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress"
+metadata:
+  name: "ingress-kube-state-metrics"
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: prometheus
+      component: kube-state-metrics
+  egress:
+  - toServices:
+    - k8sService:
+        serviceName: kubernetes
+        namespace: default
+  #- toEndpoints:
+  #  - matchLabels:
+  #      "io.kubernetes.pod.namespace": "kube-system"
+  #      "component": "kube-apiserver"
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+      toPorts:
+      - ports:
+        - port: "8080"
+          protocol: TCP
+        - port: "8081"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"

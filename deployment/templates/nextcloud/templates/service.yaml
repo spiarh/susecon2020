@@ -1,0 +1,20 @@
+---
+# Source: nextcloud/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud
+    helm.sh/chart: nextcloud-1.9.1
+    app.kubernetes.io/instance: nextcloud
+    app.kubernetes.io/managed-by: Tiller
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: nextcloud

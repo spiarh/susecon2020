@@ -1,0 +1,33 @@
+---
+# Source: grafana/templates/tests/test-podsecuritypolicy.yaml
+
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: grafana-test
+  namespace: monitoring
+  labels:
+    app: grafana
+    chart: grafana-4.3.2
+    heritage: Tiller
+    release: grafana
+spec:
+  allowPrivilegeEscalation: true
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret

@@ -1,0 +1,148 @@
+---
+# Source: nextcloud/templates/deployment-app-labels.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud
+    helm.sh/chart: nextcloud-1.9.1
+    app.kubernetes.io/instance: nextcloud
+    app.kubernetes.io/managed-by: Tiller
+    app: nextcloud
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nextcloud
+      app.kubernetes.io/instance: nextcloud
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nextcloud
+        app: nextcloud
+        app.kubernetes.io/instance: nextcloud
+    spec:
+      containers:
+      - name: nextcloud
+        image: "nextcloud:17.0.0-apache"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_HOST
+          value: "mariadb.mariadb.svc.cluster.local"
+        - name: MYSQL_DATABASE
+          value: "nextcloud"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db
+              key: db-username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db
+              key: db-password
+        - name: NEXTCLOUD_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: nextcloud-username
+        - name: NEXTCLOUD_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud
+              key: nextcloud-password
+        - name: NEXTCLOUD_TRUSTED_DOMAINS
+          value: nextcloud.susecon.lab
+        - name: NEXTCLOUD_DATA_DIR
+          value: "/var/www/html/data"
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /status.php
+            port: http
+            httpHeaders:
+            - name: Host
+              value: "nextcloud.susecon.lab"
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /status.php
+            port: http
+            httpHeaders:
+            - name: Host
+              value: "nextcloud.susecon.lab"
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        resources:
+          {}
+          
+        volumeMounts:
+        - name: nextcloud-data
+          mountPath: /var/www/
+          subPath: root
+        - name: nextcloud-data
+          mountPath: /var/www/html
+          subPath: html
+        - name: nextcloud-data
+          mountPath: /var/www/html/data
+          subPath: data
+        - name: nextcloud-data
+          mountPath: /var/www/html/config
+          subPath: config
+        - name: nextcloud-data
+          mountPath: /var/www/html/custom_apps
+          subPath: custom_apps
+        - name: nextcloud-data
+          mountPath: /var/www/tmp
+          subPath: tmp
+        - name: nextcloud-data
+          mountPath: /var/www/html/themes
+          subPath: themes
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/rproxy-ssl.config.php
+          subPath: rproxy-ssl.config.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/.htaccess
+          subPath: .htaccess
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/apache-pretty-urls.config.php
+          subPath: apache-pretty-urls.config.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/apcu.config.php
+          subPath: apcu.config.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/apps.config.php
+          subPath: apps.config.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/autoconfig.php
+          subPath: autoconfig.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/redis.config.php
+          subPath: redis.config.php
+        - name: nextcloud-config
+          mountPath: /var/www/html/config/smtp.config.php
+          subPath: smtp.config.php
+      volumes:
+      - name: nextcloud-data
+        persistentVolumeClaim:
+          claimName: nextcloud-nextcloud
+      - name: nextcloud-config
+        configMap:
+          name: nextcloud-config
+      # Will mount configuration files as www-data (id: 33) for nextcloud
+      securityContext:
+        fsGroup: 33

@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tblshoot
+  namespace: envoy
+  labels:
+    app: tblshoot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tblshoot
+  template:
+    metadata:
+      labels:
+        app: tblshoot
+    spec:
+      containers:
+      - name: tblshoot
+        image: r.spiarh.fr/alpine:latest
+        imagePullPolicy: IfNotPresent
+        args:
+        - sleep
+        - "60000"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      terminationGracePeriodSeconds: 0
