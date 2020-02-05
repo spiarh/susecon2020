@@ -1,0 +1,6 @@
+---
+storageClass:
+  create: true
+  defaultClass: true
+  name: local-path
+  reclaimPolicy: Delete

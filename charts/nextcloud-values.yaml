@@ -1,0 +1,22 @@
+nextcloud:
+  host: nextcloud.10.17.3.0.omg.howdoi.website:31080
+  username: admin
+  password: susecon
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: mysql
+  host: mariadb.mariadb.svc.cluster.local
+  user: nextcloud
+  password: nextcloud
+  database: nextcloud
+
+persistence:
+  enabled: true
+  storageClass: local-path
+
+#ingress:
+#  enabled: false

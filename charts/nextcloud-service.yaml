@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: nextcloud
+    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/name: nextcloud
+    helm.sh/chart: nextcloud-1.9.1
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    nodePort: 31080
+    port: 8080
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: nextcloud
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

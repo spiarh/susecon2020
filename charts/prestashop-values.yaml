@@ -1,0 +1,36 @@
+prestashopHost: prestashop.10.17.3.0.omg.howdoi.website:30080
+prestashopEmail: susecon@suse.com
+prestashopPassword: susecon
+prestashopFirstName: Suse
+prestashopLastName: Con
+
+prestashopCountry: "us"
+
+externalDatabase:
+  host: mariadb.mariadb.svc.cluster.local
+  port: 3306
+  user: prestashop
+  password: prestashop
+  database: prestashop
+
+mariadb:
+  enabled: false
+
+service:
+  type: NodePort
+  port: 80
+  httpsPort: 443
+  nodePorts:
+    http: 30080
+    https: 30443
+
+persistence:
+  enabled: true
+  storageClass: local-path
+
+#ingress:
+#  enabled: false
+
+
+metrics:
+  enabled: true
