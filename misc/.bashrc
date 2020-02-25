@@ -14,7 +14,7 @@ function tblshoot-shell {
 export SKUBA_TAG="update-1.2.1-3.21.1"
 alias skuba='podman run -ti --rm --net host -v "$(pwd)":/app -v "$(dirname "$SSH_AUTH_SOCK")":"$(dirname "$SSH_AUTH_SOCK")" -e SSH_AUTH_SOCK="$SSH_AUTH_SOCK" skuba:"$SKUBA_TAG" '
 
-alias deploy-tblshoot-pods='for e in $(ls overlays/); do kubectl kustomize "/root/susecon/tblshoot/overlays/$e" | kubectl apply -f -; done'
+alias deploy-tblshoot-pods='for e in $(ls /root/susecon/tblshoot/overlays/); do kubectl kustomize "/root/susecon/tblshoot/overlays/$e" | kubectl apply -f -; done'
 
 alias tblshoot-prometheus='tblshoot-shell monitoring app=prometheus'
 alias tblshoot-grafana='tblshoot-shell monitoring app=grafana'
