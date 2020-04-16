@@ -1,6 +1,5 @@
 ---
 # Source: loki/templates/rolebinding.yaml
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -9,7 +8,7 @@ metadata:
   labels:
     app: loki
     chart: loki-0.25.1
-    heritage: Tiller
+    heritage: Helm
     release: loki
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -18,4 +17,3 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: loki
-

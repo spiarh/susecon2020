@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: local-path-provisioner-0.0.12
     app.kubernetes.io/instance: local-path-provisioner
     app.kubernetes.io/version: "v0.0.12"
-    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
   selector:
@@ -40,10 +40,9 @@ spec:
               mountPath: /etc/config/
           env:
             - name: POD_NAMESPACE
-              value: local-path-provisioner
+              value: kube-system
           resources:
             {}
-            
       volumes:
         - name: config-volume
           configMap:

@@ -9,7 +9,7 @@ metadata:
     app: loki
     chart: loki-0.25.1
     release: loki
-    heritage: Tiller
+    heritage: Helm
 spec:
   clusterIP: None
   ports:

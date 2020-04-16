@@ -1,6 +1,5 @@
 ---
 # Source: grafana/templates/pvc.yaml
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -10,10 +9,9 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Tiller
+    heritage: Helm
   finalizers:
     - kubernetes.io/pvc-protection
-    
 spec:
   accessModes:
     - "ReadWriteOnce"

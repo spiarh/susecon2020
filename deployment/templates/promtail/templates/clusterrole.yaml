@@ -1,6 +1,5 @@
 ---
 # Source: promtail/templates/clusterrole.yaml
-
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -8,7 +7,7 @@ metadata:
     app: promtail
     chart: promtail-0.19.1
     release: promtail
-    heritage: Tiller
+    heritage: Helm
   name: promtail-clusterrole
   namespace: logging
 rules:

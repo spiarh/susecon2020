@@ -8,7 +8,7 @@ metadata:
     app: "prestashop"
     chart: "prestashop-9.1.3"
     release: "prestashop"
-    heritage: "Tiller"
+    heritage: "Helm"
 spec:
   selector:
     matchLabels:
@@ -23,7 +23,6 @@ spec:
       annotations:
         prometheus.io/port: "9117"
         prometheus.io/scrape: "true"
-        
     spec:      
       hostAliases:
       - ip: "127.0.0.1"
@@ -103,7 +102,6 @@ spec:
           requests:
             cpu: 300m
             memory: 512Mi
-          
         volumeMounts:
         - mountPath: /bitnami/prestashop
           name: prestashop-data
@@ -129,7 +127,6 @@ spec:
           timeoutSeconds: 1
         resources:
             null
-            
       volumes:
       - name: prestashop-data
         persistentVolumeClaim:

@@ -1,6 +1,5 @@
 ---
 # Source: grafana/templates/configmap-dashboard-provider.yaml
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,7 +7,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Tiller
+    heritage: Helm
   name: grafana-config-dashboards
   namespace: monitoring
 data:

@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: nextcloud
     helm.sh/chart: nextcloud-1.9.1
     app.kubernetes.io/instance: nextcloud
-    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/managed-by: Helm
 spec:
   accessModes:
     - "ReadWriteOnce"

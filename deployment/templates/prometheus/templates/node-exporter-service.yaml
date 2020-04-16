@@ -5,13 +5,12 @@ kind: Service
 metadata:
   annotations:
     prometheus.io/scrape: "true"
-    
   labels:
     component: "node-exporter"
     app: prometheus
     release: prometheus
     chart: prometheus-10.3.1
-    heritage: Tiller
+    heritage: Helm
   name: prometheus-node-exporter
 spec:
   clusterIP: None
