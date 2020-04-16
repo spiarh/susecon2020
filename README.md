@@ -27,6 +27,7 @@ kubectl apply -f deployment/prereq/cilium.yaml
 
 ```bash
 kubectl apply -f deployment/prereq
+kubectl apply -f deployment/prereq/metrics-server
 ```
 
 ### MariaDB

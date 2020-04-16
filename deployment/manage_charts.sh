@@ -2,9 +2,9 @@
 
 TEMPLATES_DIR="./templates"
 CHARTS_DIR="./charts"
-CHARTS=$(ls -p $CHARTS_DIR | grep '/' | sed 's/\///')
+CHARTS=$(ls "$CHARTS_DIR" | | grep -v yaml)
 
-mkdir "$TEMPLATES_DIR"
+mkdir -p "$TEMPLATES_DIR"
 
 for c in $CHARTS; do
   # NAMESPACES
@@ -26,17 +26,17 @@ for c in $CHARTS; do
 
   # ACTIONS
   if [[ "$1" == "template" ]]; then
-    echo ">>> helm template --namespace "$ns" --values "$c-values.yaml" --name "$c" "$charts_path" --output-dir $TEMPLATES_DIR"
-    helm template --namespace "$ns" --values "$values_path" --name "$c" "$charts_path" --output-dir $TEMPLATES_DIR
+    echo ">>> helm template --namespace $ns --values $c-values.yaml $c $charts_path --output-dir $TEMPLATES_DIR"
+    helm template --namespace "$ns" --values "$values_path" "$c" "$charts_path" --output-dir "$TEMPLATES_DIR"
   fi
 
   if [[ "$1" == "deploy" ]]; then
-    echo ">>> kubectl --namespace "$ns" apply -f $TEMPLATES_DIR/$c"
-    kubectl --namespace "$ns" apply -f $TEMPLATES_DIR/$c
+    echo ">>> kubectl --namespace $ns apply -f $TEMPLATES_DIR/$c"
+    kubectl --namespace "$ns" apply -f "$TEMPLATES_DIR/$c"
   fi
 
   if [[ "$1" == "destroy" ]]; then
-    echo ">>> kubectl --namespace "$ns" delete -f $TEMPLATES_DIR/$c"
-    kubectl --namespace "$ns" delete -f $TEMPLATES_DIR/$c
+    echo ">>> kubectl --namespace $ns delete -f $TEMPLATES_DIR/$c"
+    kubectl --namespace "$ns" delete -f "$TEMPLATES_DIR/$c"
   fi
 done
