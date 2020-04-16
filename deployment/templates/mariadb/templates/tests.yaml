@@ -1,6 +1,5 @@
 ---
 # Source: mariadb/templates/tests.yaml
-
 apiVersion: v1
 kind: ConfigMap
 metadata:

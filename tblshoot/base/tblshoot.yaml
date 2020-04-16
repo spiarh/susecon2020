@@ -18,15 +18,16 @@ spec:
     spec:
       containers:
       - name: tblshoot
-        image: r.spiarh.fr/alpine:latest
-        imagePullPolicy: IfNotPresent
-        args:
-        - sleep
-        - "60000"
+        image: docker.io/spiarh/tblshoot-large:latest
+        imagePullPolicy: Always
+        command:
+        - tail
+        - -f
+        - /dev/null
         resources:
           requests:
             cpu: 100m
-            memory: 100Mi
+            memory: 32Mi
           limits:
             cpu: 200m
             memory: 200Mi

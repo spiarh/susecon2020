@@ -8,12 +8,11 @@ metadata:
     app: prometheus
     release: prometheus
     chart: prometheus-10.3.1
-    heritage: Tiller
+    heritage: Helm
   name: prometheus-server
 spec:
   accessModes:
     - ReadWriteOnce
-    
   storageClassName: "local-path"
   resources:
     requests:

@@ -9,10 +9,9 @@ metadata:
     app: promtail
     chart: promtail-0.19.1
     release: promtail
-    heritage: Tiller
+    heritage: Helm
   annotations:
     {}
-    
 spec:
   selector:
     matchLabels:
@@ -26,10 +25,9 @@ spec:
         app: promtail
         release: promtail          
       annotations:
-        checksum/config: fb358c962dd53514e4757c757efcb09b7793f692cbd0d66e1bb409d1515d3078
+        checksum/config: 35b608f9bdb2ec87456c2db5882b91a9ac8ce0b74c7f7d2a8c04e921e99df7aa
         prometheus.io/port: http-metrics
         prometheus.io/scrape: "true"
-        
     spec:
       serviceAccountName: promtail
       containers:
@@ -47,7 +45,6 @@ spec:
             - mountPath: /var/log/pods
               name: pods
               readOnly: true
-            
           env:
             - name: HOSTNAME
               valueFrom:
@@ -60,7 +57,6 @@ spec:
             readOnlyRootFilesystem: true
             runAsGroup: 0
             runAsUser: 0
-            
           readinessProbe:
             failureThreshold: 5
             httpGet:
@@ -70,21 +66,16 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-            
           resources:
             {}
-            
       nodeSelector:
         {}
-        
       affinity:
         {}
-        
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: Exists
-        
       volumes:
         - name: config
           configMap:
@@ -95,4 +86,3 @@ spec:
         - hostPath:
             path: /var/log/pods
           name: pods
-        

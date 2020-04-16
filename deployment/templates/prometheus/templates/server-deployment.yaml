@@ -8,7 +8,7 @@ metadata:
     app: prometheus
     release: prometheus
     chart: prometheus-10.3.1
-    heritage: Tiller
+    heritage: Helm
   name: prometheus-server
 spec:
   selector:
@@ -24,7 +24,7 @@ spec:
         app: prometheus
         release: prometheus
         chart: prometheus-10.3.1
-        heritage: Tiller
+        heritage: Helm
     spec:
       serviceAccountName: prometheus-server
       containers:
@@ -36,7 +36,6 @@ spec:
             - --webhook-url=http://127.0.0.1:9090/-/reload
           resources:
             {}
-            
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
@@ -72,7 +71,6 @@ spec:
             successThreshold: 1
           resources:
             {}
-            
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
@@ -84,7 +82,6 @@ spec:
         runAsGroup: 65534
         runAsNonRoot: true
         runAsUser: 65534
-        
       terminationGracePeriodSeconds: 300
       volumes:
         - name: config-volume

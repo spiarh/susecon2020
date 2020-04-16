@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: local-path-provisioner-0.0.12
     app.kubernetes.io/instance: local-path-provisioner
     app.kubernetes.io/version: "v0.0.12"
-    app.kubernetes.io/managed-by: Tiller
+    app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -17,4 +17,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: local-path-provisioner
-    namespace: local-path-provisioner
+    namespace: kube-system

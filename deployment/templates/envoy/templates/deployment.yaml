@@ -8,7 +8,7 @@ metadata:
     app: envoy
     chart: envoy-1.9.0
     release: envoy
-    heritage: Tiller
+    heritage: Helm
 spec:
   replicas: 1
   selector:
@@ -29,12 +29,11 @@ spec:
         release: envoy
         component: controller
       annotations:
-        checksum/config: 36735a43a616aa7d4d7f681c0ec60347e89071ebaba7aa8a4bc0eb38b6ca4674
+        checksum/config: 3fc4c6db872ab29bba1042c7d41a29ce7f2ef86d1e0200c88fbd782fb6e296a1
     spec:
       securityContext:
         
         {}
-        
       terminationGracePeriodSeconds: 30
       containers:
 
@@ -44,53 +43,44 @@ spec:
           command:
             
             - /usr/local/bin/envoy
-            
           args:
             
             - -l
             - $loglevel
             - -c
             - /config/envoy.yaml
-            
           ports:
             - name: admin
               
               containerPort: 9901
               protocol: TCP
-              
             - name: n0
               
               containerPort: 80
               protocol: TCP
-              
             - name: n1
               
               containerPort: 443
               protocol: TCP
-              
             - name: n2
               
               containerPort: 3306
               protocol: TCP
-              
 
           livenessProbe:
             
             initialDelaySeconds: 30
             tcpSocket:
               port: admin
-            
           readinessProbe:
             
             initialDelaySeconds: 30
             tcpSocket:
               port: admin
-            
           env:
           resources:
             
             {}
-            
           volumeMounts:
             - name: config
               mountPath: /config
@@ -99,7 +89,6 @@ spec:
           lifecycle:
             
             null
-            
       volumes:
         - name: config
           configMap:
@@ -107,4 +96,4 @@ spec:
         - name: secret
           secret:
             secretName: envoy-tls
-            defaultMode: 
+            defaultMode:

@@ -1,6 +1,5 @@
 ---
 # Source: loki/templates/role.yaml
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -9,11 +8,10 @@ metadata:
   labels:
     app: loki
     chart: loki-0.25.1
-    heritage: Tiller
+    heritage: Helm
     release: loki
 rules:
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
   resourceNames:  [loki]
-
