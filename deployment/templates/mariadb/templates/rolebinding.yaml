@@ -1,5 +1,6 @@
 ---
 # Source: mariadb/templates/rolebinding.yaml
+
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -8,7 +9,7 @@ metadata:
     app: "mariadb"
     chart: "mariadb-7.3.5"
     release: "mariadb"
-    heritage: "Helm"
+    heritage: "Tiller"
 subjects:
 - kind: ServiceAccount
   name: mariadb

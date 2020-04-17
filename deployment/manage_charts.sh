@@ -33,8 +33,8 @@ for c in $CHARTS; do
   if [[ "$1" == "template" ]]; then
     echo "rm -Rvf $rendered_files_dir"
     rm -Rvf "$rendered_files_dir"
-    echo ">>> helm template --namespace $ns --values $c-values.yaml $c $charts_path --output-dir $TEMPLATES_DIR"
-    helm template --namespace "$ns" --values "$values_path" "$c" "$charts_path" --output-dir "$TEMPLATES_DIR"
+    echo ">>> helm template --namespace $ns --values $c-values.yaml --name $c $charts_path --output-dir $TEMPLATES_DIR"
+    helm template --namespace "$ns" --values "$values_path" --name "$c" "$charts_path" --output-dir "$TEMPLATES_DIR"
   fi
 
   if [[ "$1" == "deploy" ]]; then

@@ -1,5 +1,6 @@
 ---
 # Source: grafana/templates/tests/test-podsecuritypolicy.yaml
+
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -8,7 +9,7 @@ metadata:
   labels:
     app: grafana
     chart: grafana-4.3.2
-    heritage: Helm
+    heritage: Tiller
     release: grafana
 spec:
   allowPrivilegeEscalation: true

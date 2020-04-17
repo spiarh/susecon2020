@@ -9,9 +9,10 @@ metadata:
     app: loki
     chart: loki-0.25.1
     release: loki
-    heritage: Helm
+    heritage: Tiller
   annotations:
     {}
+    
 spec:
   type: ClusterIP
   ports:

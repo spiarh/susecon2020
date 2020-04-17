@@ -1,5 +1,6 @@
 ---
 # Source: loki/templates/podsecuritypolicy.yaml
+
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -8,7 +9,7 @@ metadata:
   labels:
     app: loki
     chart: loki-0.25.1
-    heritage: Helm
+    heritage: Tiller
     release: loki
 spec:
   privileged: false
@@ -38,3 +39,4 @@ spec:
   readOnlyRootFilesystem: true
   requiredDropCapabilities:
     - ALL
+

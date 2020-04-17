@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: nextcloud
     helm.sh/chart: nextcloud-1.9.1
     app.kubernetes.io/instance: nextcloud
-    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/managed-by: Tiller
     app: nextcloud
 spec:
   replicas: 1
@@ -89,6 +89,7 @@ spec:
           failureThreshold: 3
         resources:
           {}
+          
         volumeMounts:
         - name: nextcloud-data
           mountPath: /var/www/

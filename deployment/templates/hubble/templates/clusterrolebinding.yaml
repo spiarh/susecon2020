@@ -13,7 +13,6 @@ subjects:
   name: hubble
   namespace: kube-system
 ---
-# Source: hubble/templates/clusterrolebinding.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

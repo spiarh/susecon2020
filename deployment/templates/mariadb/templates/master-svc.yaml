@@ -9,10 +9,11 @@ metadata:
     component: "master"
     chart: "mariadb-7.3.5"
     release: "mariadb"
-    heritage: "Helm"
+    heritage: "Tiller"
   annotations:
     prometheus.io/port: "9104"
     prometheus.io/scrape: "true"
+    
 spec:
   type: NodePort
   ports:

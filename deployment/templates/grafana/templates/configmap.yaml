@@ -9,7 +9,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Helm
+    heritage: Tiller
 data:
   grafana.ini: |
     [analytics]
@@ -44,3 +44,4 @@ data:
       orgId: 1
     - name: Loki
       orgId: 1
+    

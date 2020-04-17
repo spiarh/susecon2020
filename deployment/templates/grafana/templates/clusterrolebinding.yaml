@@ -1,5 +1,6 @@
 ---
 # Source: grafana/templates/clusterrolebinding.yaml
+
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -8,7 +9,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Helm
+    heritage: Tiller
 subjects:
   - kind: ServiceAccount
     name: grafana

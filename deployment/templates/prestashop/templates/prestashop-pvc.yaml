@@ -8,7 +8,7 @@ metadata:
     app: "prestashop"
     chart: "prestashop-9.1.3"
     release: "prestashop"
-    heritage: "Helm"
+    heritage: "Tiller"
 spec:
   accessModes:
     - "ReadWriteOnce"

@@ -1,5 +1,6 @@
 ---
 # Source: grafana/templates/tests/test-configmap.yaml
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,7 +9,7 @@ metadata:
   labels:
     app: grafana
     chart: "grafana-4.3.2"
-    heritage: "Helm"
+    heritage: "Tiller"
     release: "grafana"
 data:
   run.sh: |-

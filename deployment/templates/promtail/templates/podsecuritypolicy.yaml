@@ -1,5 +1,6 @@
 ---
 # Source: promtail/templates/podsecuritypolicy.yaml
+
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -8,7 +9,7 @@ metadata:
   labels:
     app: promtail
     chart: promtail-0.19.1
-    heritage: Helm
+    heritage: Tiller
     release: promtail
 spec:
   privileged: false

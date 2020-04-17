@@ -8,10 +8,11 @@ metadata:
     app: envoy
     chart: envoy-1.9.0
     release: envoy
-    heritage: Helm
+    heritage: Tiller
 spec:
   selector:
     matchLabels:
       app: envoy
       release: envoy
   maxUnavailable: 1
+  

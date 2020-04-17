@@ -1,5 +1,6 @@
 ---
 # Source: grafana/templates/clusterrole.yaml
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -7,7 +8,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Helm
+    heritage: Tiller
   name: grafana-clusterrole
 rules:
 - apiGroups: [""] # "" indicates the core API group
