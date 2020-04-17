@@ -16,10 +16,23 @@ A laptop with:
 ```bash
 zypper ar http://download.opensuse.org/repositories/devel:/languages:/go/openSUSE_Leap_15.1/devel:languages:go.repo
 zypper ar http://download.opensuse.org/repositories/systemsmanagement:/terraform/openSUSE_Leap_15.1/systemsmanagement:terraform.repo
-zypper ar https://download.opensuse.org/repositories/devel:/kubic/openSUSE_Leap_15.1/devel:kubic.repo
-zypper --gpg-auto-import-keys in -y libvirt terraform terraform-provider-libvirt go1.14 git helm curl mariadb-client
+zypper --gpg-auto-import-keys in -y libvirt terraform terraform-provider-libvirt go1.14 git curl mariadb-client jq
 systemctl enable --now libvirtd
 ```
+
+* helm 2
+
+There is currently an issue with helm3 and templating so we use
+helm 2 but without Tiller.
+
+```
+curl -OL https://get.helm.sh/helm-v2.16.6-linux-amd64.tar.gz
+tar zxf helm-v2.16.6-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm && chmod +x /usr/local/bin/helm
+rm -Rf helm-v2.16.6-linux-amd64.tar.gz linux-amd64/
+```
+
+* kubectl
 
 ```bash
 curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl
@@ -104,7 +117,6 @@ kubectl apply -f deployment/prereq/cilium.yaml
 kubectl apply -f deployment/prereq
 kubectl apply -f deployment/prereq/metrics-server
 ./deployment/manage_charts.sh template
-./deployment/manage_charts.sh
 ```
 
 Deploy our storage class and make sure it's ready
@@ -129,10 +141,27 @@ mysql -u root -h 10.17.3.0 -psusecon -P30006 < misc/mariadb.sql
 ./deployment/manage_charts.sh deploy
 ```
 
+### Envoy
+
+Expose envoy externally:
+
+```
+kubectl -n envoy patch svc envoy -p '{"spec":{"externalIPs":["10.17.3.0"]}}'
+```
+
 ### tblshoot
 
 At the root of the repo run:
 
 ```bash
 for e in $(ls ./tblshoot/overlays/); do kubectl kustomize "./tblshoot/overlays/$e" | kubectl apply -f -; done
+```
+
+### Workstation
+
+Add entries in `/etc/hosts` so we can use fqdn during the labs,
+envoy configuration depends on it !
+
+```bash
+echo '10.17.3.0 envoy prestashop nextcloud grafana prometheus hubble prestashop.susecon.lab nextcloud.susecon.lab grafana.susecon.lab prometheus.susecon.lab hubble.susecon.lab envoy.susecon.lab' >> /etc/hosts'
 ```
