@@ -537,5 +537,31 @@ spec:
 Really nothing new for us again here, we alreay master L4 rules.
 
 
+Network Policies - Nextcloud, Prestashop, Monitoring and Logging
+========================
 
-Congrats !!
+We've seen so far the following types of rules:
+
+* `L3 label-based`
+* `L3 entity-based`
+* `L4`
+* `L7 HTTP`
+* `L7 Kubernetes ServiceAccount`
+* `allow dns queries`
+
+There are minimum three other types to discover:
+
+* `L3 service-based (to apiserver)`
+* `DNS filtering`
+* `L3 IP/CIDR`
+
+Based on what we've learnt, it's your time now to create network policies
+for the other workloads !
+
+There can be of course several options sometimes and some of them can be better
+in a situation than an other. Considering that, you can find the policies we
+used to fully secure our workloads in the following directory
+[network-security-policies/](network-security-policies/)
+
+
+Have Fun !!!
