@@ -1,5 +1,6 @@
 ---
 # Source: mariadb/templates/master-configmap.yaml
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,7 +10,7 @@ metadata:
     component: "master"
     chart: "mariadb-7.3.5"
     release: "mariadb"
-    heritage: "Helm"
+    heritage: "Tiller"
 data:
   my.cnf: |-
     [mysqld]

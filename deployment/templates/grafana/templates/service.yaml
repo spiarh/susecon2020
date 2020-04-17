@@ -9,7 +9,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Helm
+    heritage: Tiller
 spec:
   type: ClusterIP
   ports:

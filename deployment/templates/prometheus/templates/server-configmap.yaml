@@ -8,13 +8,15 @@ metadata:
     app: prometheus
     release: prometheus
     chart: prometheus-10.3.1
-    heritage: Helm
+    heritage: Tiller
   name: prometheus-server
 data:
   alerting_rules.yml: |
     {}
+    
   alerts: |
     {}
+    
   prometheus.yml: |
     global:
       evaluation_interval: 1m
@@ -228,7 +230,10 @@ data:
         source_labels:
         - __meta_kubernetes_pod_name
         target_label: kubernetes_pod_name
+    
   recording_rules.yml: |
     {}
+    
   rules: |
     {}
+    

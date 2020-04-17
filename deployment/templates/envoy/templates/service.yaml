@@ -1,5 +1,6 @@
 ---
 # Source: envoy/templates/service.yaml
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,7 +9,7 @@ metadata:
     app: envoy
     chart: envoy-1.9.0
     release: envoy
-    heritage: Helm
+    heritage: Tiller
   annotations:
 spec:
   type: ClusterIP
@@ -17,14 +18,17 @@ spec:
       port: 80
       protocol: TCP
       targetPort: n0
+      
     - name: n1
       port: 443
       protocol: TCP
       targetPort: n1
+      
     - name: n2
       port: 3306
       protocol: TCP
       targetPort: n2
+      
   selector:
     app: envoy
     release: envoy

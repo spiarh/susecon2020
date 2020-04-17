@@ -1,0 +1,47 @@
+---
+# Source: grafana/templates/tests/test.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: grafana-test
+  labels:
+    app: grafana
+    chart: "grafana-4.3.2"
+    heritage: "Tiller"
+    release: "grafana"
+  annotations:
+    "helm.sh/hook": test-success
+  namespace: monitoring
+spec:
+  serviceAccountName: grafana-test
+  initContainers:
+    - name: test-framework
+      image: "dduportal/bats:0.4.0"
+      command:
+      - "bash"
+      - "-c"
+      - |
+        set -ex
+        # copy bats to tools dir
+        cp -R /usr/local/libexec/ /tools/bats/
+      volumeMounts:
+      - mountPath: /tools
+        name: tools
+  containers:
+    - name: grafana-test
+      image: "dduportal/bats:0.4.0"
+      command: ["/tools/bats/bats", "-t", "/tests/run.sh"]
+      volumeMounts:
+        - mountPath: /tests
+          name: tests
+          readOnly: true
+        - mountPath: /tools
+          name: tools
+  volumes:
+  - name: tests
+    configMap:
+      name: grafana-test
+  - name: tools
+    emptyDir: {}
+  restartPolicy: Never

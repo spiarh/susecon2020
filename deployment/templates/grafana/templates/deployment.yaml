@@ -1,5 +1,6 @@
 ---
 # Source: grafana/templates/deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,7 +10,7 @@ metadata:
     app: grafana
     chart: grafana-4.3.2
     release: grafana
-    heritage: Helm
+    heritage: Tiller
 spec:
   replicas: 1
   selector:
@@ -24,16 +25,17 @@ spec:
         app: grafana
         release: grafana
       annotations:
-        checksum/config: c97ac44c1a92ac49c910c5bd6a50fb72dbd262e62faedc3c323195bc362ff867
+        checksum/config: 7642920ffe02cc3c6c5ba03583e1b3a24ca79ca685e232aee2e20f6a215529b0
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: 9d5f09dd94ac45155cf2825322739048d8be3e373718063a2f56902e76682c3f
-        checksum/secret: 6007bf4c94a5ad0b2aa6c1d414c9a72952d450a98b19ed3511675bd1d9d50712
+        checksum/sc-dashboard-provider-config: 60ea680acad4f82c81cfdb866e5af0661b8c850a63e7430f860fda9fede2bd77
+        checksum/secret: ac7a6f7797337bdaa0d2daf1f03753e3f1bad34d51c7f602fc69458e2d89433d
     spec:
       
       serviceAccountName: grafana
       securityContext:
         fsGroup: 472
         runAsUser: 472
+        
       initContainers:
         - name: init-chown-data
           image: "busybox:1.30"
@@ -43,6 +45,7 @@ spec:
           command: ["chown", "-R", "472:472", "/var/lib/grafana"]
           resources:
             {}
+            
           volumeMounts:
             - name: storage
               mountPath: "/var/lib/grafana"
@@ -59,6 +62,7 @@ spec:
               value: "both"
           resources:
             {}
+            
           volumeMounts:
             - name: sc-dashboard-volume
               mountPath: "/tmp/dashboards"
@@ -105,12 +109,15 @@ spec:
               port: 3000
             initialDelaySeconds: 60
             timeoutSeconds: 30
+            
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3000
+            
           resources:
             {}
+            
       volumes:
         - name: config
           configMap:

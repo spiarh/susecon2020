@@ -9,7 +9,7 @@ metadata:
     helm.sh/chart: local-path-provisioner-0.0.12
     app.kubernetes.io/instance: local-path-provisioner
     app.kubernetes.io/version: "v0.0.12"
-    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/managed-by: Tiller
 rules:
 - apiGroups: [""]
   resources: ["nodes", "persistentvolumeclaims"]

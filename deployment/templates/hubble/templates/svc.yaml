@@ -1,20 +1,7 @@
 ---
 # Source: hubble/templates/svc.yaml
-kind: Service
-apiVersion: v1
-metadata:
-  namespace: kube-system
-  name: hubble-ui
-spec:
-  selector:
-    k8s-app: hubble-ui
-  ports:
-    - name: http
-      port: 12000
-      targetPort: 12000
-  type: ClusterIP
+
 ---
-# Source: hubble/templates/svc.yaml
 kind: Service
 apiVersion: v1
 metadata:
@@ -31,3 +18,17 @@ spec:
   - targetPort: 50051
     protocol: TCP
     port: 50051
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: kube-system
+  name: hubble-ui
+spec:
+  selector:
+    k8s-app: hubble-ui
+  ports:
+    - name: http
+      port: 12000
+      targetPort: 12000
+  type: ClusterIP

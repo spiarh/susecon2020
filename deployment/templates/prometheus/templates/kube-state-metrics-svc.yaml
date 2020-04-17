@@ -5,12 +5,13 @@ kind: Service
 metadata:
   annotations:
     prometheus.io/scrape: "true"
+    
   labels:
     component: "kube-state-metrics"
     app: prometheus
     release: prometheus
     chart: prometheus-10.3.1
-    heritage: Helm
+    heritage: Tiller
   name: prometheus-kube-state-metrics
 spec:
   clusterIP: None
