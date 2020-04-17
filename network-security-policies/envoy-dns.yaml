@@ -1,0 +1,20 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to DNS service"
+metadata:
+  name: "egress-dns"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "kube-system"
+        "k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY

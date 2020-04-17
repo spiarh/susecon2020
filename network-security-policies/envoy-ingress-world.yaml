@@ -1,0 +1,24 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from outside"
+metadata:
+  name: "ingress-world"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  ingress:
+  - fromEntities:
+    - world
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+      - port: "443"
+        protocol: TCP
+      - port: "3306"
+        protocol: TCP
+      - port: "9901"
+        protocol: TCP

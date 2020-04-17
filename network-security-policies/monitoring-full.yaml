@@ -1,4 +1,4 @@
-#% l3-labels-based
+#% l3-label-based
 #% l3-service-based
 #% l4 
 #% kubernetes-namespace
@@ -34,18 +34,10 @@ spec:
     matchLabels:
       app: grafana
   egress:
-  # TODO: check why grafana fetch apiserver
   - toServices:
     - k8sService:
         serviceName: kubernetes
         namespace: default
-  #- toCIDR:
-  #  - 172.16.0.0/22
-  #  #DOEST NOT WORK
-  #  toPorts:
-  #  - ports:
-  #    - port: "6443"
-  #      protocol: ANY
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": "kube-system"

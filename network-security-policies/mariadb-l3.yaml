@@ -1,0 +1,27 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from webapp and metrics"
+metadata:
+  name: "ingress-webapp-metrics"
+  namespace: mariadb
+spec:
+  endpointSelector:
+    matchLabels:
+      app: mariadb
+  egress:
+  - {}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "nextcloud"
+        "app.kubernetes.io/instance": "nextcloud"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "prestashop"
+        "app": "prestashop"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
