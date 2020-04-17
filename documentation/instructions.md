@@ -383,14 +383,159 @@ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.k
 ```
 
 
-
 Network Policies - Envoy
 ========================
 
+A good place to continue our journey is with the front proxy envoy.
+Since it requires more rules, we will split the rules in several policies but
+all of this could fit in just one policy.
+
+The policies covers:
+* `L3 label-based`
+* `L3 entity-based`
+* `L4`
+* `allow dns queries`
+
+![](./susecon2020-mariadb.png)
+
+## Allow the world to reach our cluster
+
+First, let's allow the `world` to reach the envoy pod, here the world
+means everything outside of the cluster. It is not specified in the diagramm
+but the world needs access to HTTP (80/tcp), HTTPS (443/TCP), MYSQL (3306/TCP)
+and ENVOY admin page (9901/TCP).
+
+Create `envoy-ingress-world.yaml` and apply:
+
+```
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from outside"
+metadata:
+  name: "ingress-world"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  ingress:
+  - fromEntities:
+    - world
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+      - port: "443"
+        protocol: TCP
+      - port: "3306"
+        protocol: TCP
+      - port: "9901"
+        protocol: TCP
+```
+
+The only new thing for us here is the `fromEntities: ["world"]`.
+The world entity corresponds to all endpoints outside of the cluster.
+Allowing to world is identical to allowing to CIDR 0/0. An alternative
+to allowing from and to world is to define fine grained DNS or CIDR based policies.
 
 
-Apply Network Policies
-======================
+## Allow Envoy to use DNS
+
+In our configuration, Envoy uses internal DNS to query a service and retrieve
+the pod IPs in order to load balance traffic to the pods.
+
+Create `envoy-dns.yaml` and apply:
+
+```yaml
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to DNS service"
+metadata:
+  name: "egress-dns"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "kube-system"
+        "k8s-app": "kube-dns"
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+```
+
+Nothing new here, this is just a basic L4 rule allowing DNS traffic.
+
+## Allow envoy traffic toward the backends
+
+The only part left is to allow traffic to the HTTP and MySQL backends.
+
+```yaml
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow egress to HTTP and MySQL backends"
+metadata:
+  name: "egress-http-mysql"
+  namespace: envoy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: envoy
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "nextcloud"
+        "app.kubernetes.io/instance": "nextcloud"
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "prestashop"
+        "app": "prestashop"
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "grafana"
+      toPorts:
+      - ports:
+        - port: "3000"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        "app": "prometheus"
+      toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "kube-system"
+        "k8s-app": "hubble-ui"
+      toPorts:
+      - ports:
+        - port: "12000"
+          protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "mariadb"
+        "app": "mariadb"
+      toPorts:
+      - ports:
+        - port: "3306"
+          protocol: TCP
+```
+
+Really nothing new for us again here, we alreay master L4 rules.
+
 
 
 Congrats !!
