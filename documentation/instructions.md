@@ -41,6 +41,11 @@ come soon as we have an engineer in SUSE working on this implementation !
 
 ## Out first policy
 
+For our first policy we will only use L3.
+
+The policy covers:
+* `L3 label-based`
+
 ![](./susecon2020-mariadb.png)
 
 We can notice from the diagram above that the mariadb pod does not require any
@@ -49,9 +54,6 @@ from `4` external components.
 
 Note: In the real-world, it's very unlikely that we would expose mariadb
 through the frontend but this was just more convenient for the lab.
-
-For our first policy we will only start with `L3 label-based`
-network policies.
 
 Create a file `mariadb-l3.yaml`
 
@@ -135,7 +137,7 @@ any other pod, even the one allowed in ingress.
 * Can we reach nextcloud ?
 
 ```bash
-kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src-k8s-pod mariadb:mariadb-0 --dst any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud
+$ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src-k8s-pod mariadb:mariadb-0 --dst any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud
 ----------------------------------------------------------------
 Tracing From: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] => To: [any:app.kubernetes.io/instance=nextcloud, any:io.kubernetes.pod.namespace=nextcloud] Ports: [0/ANY]
 
@@ -164,7 +166,7 @@ that there is a rule in a policy selecting the mariadb pod and that egress is de
 
 
 ```bash
-kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0
+$ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0
 ----------------------------------------------------------------
 
 Tracing From: [any:app.kubernetes.io/instance=nextcloud, any:io.kubernetes.pod.namespace=nextcloud] => To: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] Ports: [0/ANY]
@@ -186,7 +188,7 @@ Final verdict: ALLOWED
 * Can we be reached from prometheus ?
 
 ```bash
-kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app=prometheus,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0
+$ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app=prometheus,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0
 ----------------------------------------------------------------
 
 Tracing From: [any:app=prometheus, any:io.kubernetes.pod.namespace=nextcloud] => To: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] Ports: [0/ANY]
@@ -209,11 +211,181 @@ It looks like it's working :smile: our rules are applied to the pod.
 We'll see with our upgraded policy how we can be more specific when
 tracing a policy.
 
-
-
-
 ## Test it in CLI
 
+In each namespace runs a `tblshoot` pod with the same labels as the associacted
+workload that we can use to test connections, for example, let's try to connect
+to mariadb from the `tblshoot` pod associated with loki:
+
+```bash
+$ tblshoot-loki
+
+/ # nc -w 3 -v -z mariadb.mariadb.svc.cluster.local 3306
+nc: connect to mariadb.mariadb.svc.cluster.local port 3306 (tcp) timed out: Operation in progress
+
+/ # mysql --connect-timeout 3 -u root -psusecon -h mariadb.mariadb.svc.cluster.local -e quit
+ERROR 2002 (HY000): Can't connect to MySQL server on 'mariadb.mariadb.svc.cluster.local' (110)
+```
+
+It's blocked ! Hubble can confirm :wink:
+
+![](./susecon2020-mariadb-l3-hubble-3.png)
+
+
+The same command but with the `tblshoot` pod associated with prestashop:
+
+```bash
+$ tblshoot-prestashop
+/ # nc -w 3 -v -z mariadb.mariadb.svc.cluster.local 3306
+Connection to mariadb.mariadb.svc.cluster.local 3306 port [tcp/mysql] succeeded!
+
+/ # mysql --connect-timeout 3 -u root -psusecon -h mariadb.mariadb.svc.cluster.local -e quit
+```
+
+It works !
+
+
+## A beefier policy
+
+In order to harden our first policy, we will add L4 and L7 filtering. For the purpose
+of the Labs, we will also use ServiceAccounts to match endpoints.
+
+The policy covers:
+* `L3 label-based`
+* `L4`
+* `L7 HTTP`
+* `L7 Kubernetes ServiceAccount`
+
+Create `mariadb-full.yaml`:
+
+```
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+description: "Allow ingress from webapp and metrics"
+metadata:
+  name: "ingress-webapp-metrics"
+  namespace: mariadb
+spec:
+  endpointSelector:
+    matchLabels:
+      app: mariadb
+  egress:
+  - {}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "nextcloud"
+        "app.kubernetes.io/instance": "nextcloud"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "prestashop"
+        "app": "prestashop"
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "envoy"
+        "app": "envoy"
+    toPorts:
+    - ports:
+      - port: "3306"
+        protocol: TCP
+    - matchLabels:
+        "io.kubernetes.pod.namespace": "monitoring"
+        io.cilium.k8s.policy.serviceaccount: prometheus-server
+      toPorts:
+      - ports:
+        - port: "9104"
+          protocol: TCP
+          rules:
+            http:
+            - method: "GET"
+              path: "/metrics"
+```
+
+1. Nextcloud, Prestashop and envoy can only reach mariadb pod
+using `TCP` on port `3306`.
+2. The pods running in `monitoring` namespace with the ServiceAccount
+`prometheus-server` can only reach mariadb pod using `TCP` on port `9104`
+only with HTTP method `GET` on path `/metrics`
+
+
+Now let's try again to trace the policy with cilium by using the same
+command we used to see if we can be reached from nextcloud ?
+
+
+```
+$ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0 
+----------------------------------------------------------------
+
+Tracing From: [any:app.kubernetes.io/instance=nextcloud, any:io.kubernetes.pod.namespace=nextcloud] => To: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] Ports: [0/ANY]
+
+Resolving ingress policy for [k8s:app=mariadb k8s:chart=mariadb-7.3.5 k8s:component=master k8s:io.cilium.k8s.policy.cluster=default k8s:io.cilium.k8s.policy.serviceaccount=mariadb k8s:io.kubernetes.pod.namespace=mariadb k8s:release=mariadb k8s:statefulset.kubernetes.io/pod-name=mariadb-0]
+* Rule {"matchLabels":{"any:app":"mariadb","k8s:io.kubernetes.pod.namespace":"mariadb"}}: selected
+    Allows from labels {"matchLabels":{"any:app.kubernetes.io/instance":"nextcloud","any:io.kubernetes.pod.namespace":"nextcloud"}}
+    Allows from labels {"matchLabels":{"any:app":"prestashop","any:io.kubernetes.pod.namespace":"prestashop"}}
+    Allows from labels {"matchLabels":{"any:app":"envoy","any:io.kubernetes.pod.namespace":"envoy"}}
+      Found all required labels
+      Allows port [{3306 TCP}]
+        No port match found
+      Allows port []
+        No port match found
+1/1 rules selected
+Found no allow rule
+Ingress verdict: denied
+
+Final verdict: DENIED
+```
+
+That's interesting, all what we do in the policy is to specify a port and a protocol :thinking:.
+This means for us that we have to be more accurate in what we want to trace, let's add a flag
+in our request to specify the port we want to use:
+
+```
+$ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0 --dport 3306/tcp
+----------------------------------------------------------------
+
+Tracing From: [any:app.kubernetes.io/instance=nextcloud, any:io.kubernetes.pod.namespace=nextcloud] => To: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] Ports: [3306/TCP]
+
+Resolving ingress policy for [k8s:app=mariadb k8s:chart=mariadb-7.3.5 k8s:component=master k8s:io.cilium.k8s.policy.cluster=default k8s:io.cilium.k8s.policy.serviceaccount=mariadb k8s:io.kubernetes.pod.namespace=mariadb k8s:release=mariadb k8s:statefulset.kubernetes.io/pod-name=mariadb-0]
+* Rule {"matchLabels":{"any:app":"mariadb","k8s:io.kubernetes.pod.namespace":"mariadb"}}: selected
+    Allows from labels {"matchLabels":{"any:app.kubernetes.io/instance":"nextcloud","any:io.kubernetes.pod.namespace":"nextcloud"}}
+    Allows from labels {"matchLabels":{"any:app":"prestashop","any:io.kubernetes.pod.namespace":"prestashop"}}
+    Allows from labels {"matchLabels":{"any:app":"envoy","any:io.kubernetes.pod.namespace":"envoy"}}
+      Found all required labels
+      Allows port [{3306 TCP}]
+      Allows port []
+        No port match found
+1/1 rules selected
+Found allow rule
+Ingress verdict: allowed
+
+Final verdict: ALLOWED
+```
+
+YES, that was it !
+
+Now you can play to see what's working or not.
+
+* nextcloud to mariadb on port 3306 without protocol
+
+```bash
+kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0 --dport 3306
+```
+
+* nextcloud to mariadb on port 3306 in UDP
+
+```bash
+kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0 --dport 3306/udp
+```
+
+* nextcloud to mariadb on metrics port 9104 in TCP
+
+```bash
+kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud --dst-k8s-pod mariadb:mariadb-0 --dport 9104/tcp
+```
+
+
+
+Network Policies - Envoy
+========================
 
 
 
