@@ -384,7 +384,7 @@ The policies covers:
 * `L4`
 * `allow dns queries`
 
-![](./susecon2020-mariadb.png)
+![](./susecon2020-envoy.png)
 
 ## Allow the world to reach our cluster
 
