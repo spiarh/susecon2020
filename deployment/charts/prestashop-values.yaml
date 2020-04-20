@@ -10,21 +10,17 @@ externalDatabase:
   host: mariadb.mariadb.svc.cluster.local
   port: 3306
   user: prestashop
-  password: prestashop
+  password: susecon
   database: prestashop
 
 mariadb:
   enabled: false
 
 service:
-#  type: NodePort
   type: LoadBalancer
   port: 80
   httpsPort: 443
   nodePorts: {}
-#  nodePorts:
-#    http: 30080
-#    https: 30443
 
 persistence:
   enabled: true

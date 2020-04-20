@@ -1,22 +1,5 @@
 alertmanager:
   enabled: false
-#extraScrapeConfigs: |
-#  - job_name: kobay_prometheus-node-exporter
-#    relabel_configs:
-#    - source_labels:
-#      - __address__
-#      target_label: kubernetes_node
-#    - replacement: $1:30091
-#      source_labels:
-#      - __address__
-#      target_label: __address__
-#    scrape_interval: 5s
-#    static_configs:
-#    - targets:
-#      - 192.168.73.128
-#      - 192.168.72.102
-#      - 192.168.72.182
-#      - 192.168.73.114
 kubeStateMetrics:
   enabled: true
 nodeExporter:

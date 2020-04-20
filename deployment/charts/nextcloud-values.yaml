@@ -23,7 +23,7 @@ externalDatabase:
   type: mysql
   host: mariadb.mariadb.svc.cluster.local
   user: nextcloud
-  password: nextcloud
+  password: susecon
   database: nextcloud
 
 persistence:
