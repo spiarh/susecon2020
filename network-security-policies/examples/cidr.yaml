@@ -1,0 +1,20 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "cidr-rule"
+  namespace: "tblshoot"
+spec:
+  endpointSelector:
+    matchLabels:
+      app: tblshoot
+  ingress:
+  - fromCIDR:
+    - 0.0.0.0/0
+  egress:
+  - toCIDR:
+    - 192.168.24.0/24
+  - toCIDRSet:
+    - cidr: 10.0.0.0/8
+      except:
+      - 10.24.0.0/16

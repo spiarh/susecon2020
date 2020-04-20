@@ -107,7 +107,6 @@ files:
                       cluster: service_prestashop
                 - name: local_service_nextcloud
                   domains: ["nextcloud.susecon.lab"]
-                  #domains: ["*"]
                   routes:
                   - match:
                       prefix: "/"
@@ -148,7 +147,6 @@ files:
                       cluster: service_envoy
               http_filters:
               - name: envoy.router
-          #use_proxy_proto: true
           tls_context:
             common_tls_context:
               tls_certificates:
@@ -156,17 +154,6 @@ files:
                     filename: "/secrets/tls.crt"
                   private_key:
                     filename: "/secrets/tls.key"
-        #- transport_socket:
-        #    name: envoy.transport_sockets.tls
-        #    typed_config:
-        #      "@type": type.googleapis.com/envoy.api.v2.auth.DownstreamTlsContext
-        #      common_tls_context:
-        #        alpn_protocols: h2,http/1.1
-        #        tls_certificates:
-        #        - certificate_chain:
-        #            filename: "/secrets/tls.crt"
-        #          private_key:
-        #            filename: "/secrets/tls.key"
       - name: listener_mariadb
         address:
           socket_address:

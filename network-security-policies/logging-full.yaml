@@ -1,4 +1,4 @@
-#% l3-labels-based
+#% l3-label-based
 #% l3-service-based
 #% l4 
 #% kubernetes-namespace
@@ -35,7 +35,6 @@ spec:
             - method: "GET"
               path: "/metrics"
     - matchLabels:
-        #"io.kubernetes.pod.namespace": "logging"
         "app": "promtail"
       toPorts:
       - ports:
@@ -53,7 +52,6 @@ spec:
     matchLabels:
       app: loki
   egress:
-  # TODO: check why loki fetch apiserver
   - toServices:
     - k8sService:
         serviceName: kubernetes
@@ -116,7 +114,6 @@ spec:
         - port: "53"
           protocol: ANY
     - matchLabels:
-        #"k8s:io.kubernetes.pod.namespace": "logging"
         "app": "loki"
       toPorts:
       - ports:

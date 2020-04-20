@@ -27,10 +27,6 @@ persistence:
   storageClassName: local-path
 rbac:
   create: true
-#service:
-#  nodePort: 30030
-#  servicePort: 80
-#  type: NodePort
 sidecar:
   dashboards:
     enabled: true

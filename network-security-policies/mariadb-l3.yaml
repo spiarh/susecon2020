@@ -1,8 +1,3 @@
-#% l3-label-based
-#% l4
-#% l7-http
-#% kubernetes-serviceaccount
-#% kubernetes-namespace
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -27,18 +22,6 @@ spec:
     - matchLabels:
         "io.kubernetes.pod.namespace": "envoy"
         "app": "envoy"
-    toPorts:
-    - ports:
-      - port: "3306"
-        protocol: TCP
     - matchLabels:
         "io.kubernetes.pod.namespace": "monitoring"
-        io.cilium.k8s.policy.serviceaccount: prometheus-server
-      toPorts:
-      - ports:
-        - port: "9104"
-          protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        "app": "prometheus"
