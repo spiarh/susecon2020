@@ -1,4 +1,4 @@
 bin/
 *.swp
 terraform-libvirt-tf/.terraform
-deployment/templates
+!deployment/templates/.keep
