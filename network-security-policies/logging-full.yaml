@@ -30,10 +30,10 @@ spec:
       - ports:
         - port: "3100"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"
     - matchLabels:
         "app": "promtail"
       toPorts:
@@ -85,10 +85,10 @@ spec:
       - ports:
         - port: "3101"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy

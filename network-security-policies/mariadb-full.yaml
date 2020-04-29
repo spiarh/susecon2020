@@ -38,7 +38,7 @@ spec:
       - ports:
         - port: "9104"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"

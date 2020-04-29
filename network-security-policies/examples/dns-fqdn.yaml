@@ -15,8 +15,8 @@ spec:
           "k8s:k8s-app": kube-dns
       toPorts:
         - ports:
-           - port: "53"
-             protocol: ANY
+          - port: "53"
+            protocol: ANY
           rules:
             dns:
               - matchPattern: "*"
