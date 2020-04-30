@@ -111,6 +111,7 @@ resource "null_resource" "worker_wait_cloudinit" {
   provisioner "remote-exec" {
     inline = [
       "cloud-init status --wait > /dev/null",
+      "sudo shutdown -r +1",
     ]
   }
 }
@@ -129,8 +130,8 @@ resource "null_resource" "worker_reboot" {
     }
 
     command = <<EOT
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $user@$host sudo reboot || :
 # wait for ssh ready after reboot
+sleep 90
 until nc -zv $host 22; do sleep 5; done
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -oConnectionAttempts=60 $user@$host /usr/bin/true
 EOT

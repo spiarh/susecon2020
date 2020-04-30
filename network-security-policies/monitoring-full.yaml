@@ -137,11 +137,6 @@ spec:
       # kube-dns
       - port: "9153"
         protocol: TCP
-      #rules:
-      #  http:
-      #  - method: "GET"
-      #    #path: "/metrics"
-      #    path: ""
 ---
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -159,10 +154,6 @@ spec:
     - k8sService:
         serviceName: kubernetes
         namespace: default
-  #- toEndpoints:
-  #  - matchLabels:
-  #      "io.kubernetes.pod.namespace": "kube-system"
-  #      "component": "kube-apiserver"
   ingress:
   - fromEndpoints:
     - matchLabels:
@@ -174,7 +165,7 @@ spec:
           protocol: TCP
         - port: "8081"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"

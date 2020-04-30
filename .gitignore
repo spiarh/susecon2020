@@ -1,4 +1,7 @@
 bin/
 *.swp
 terraform-libvirt-tf/.terraform
+terraform-libvirt-tf/terraform.tfstate*
 !deployment/templates/.keep
+caasp-cluster/
+deployment/templates/*

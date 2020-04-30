@@ -23,10 +23,10 @@ spec:
       - ports:
         - port: "9117"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"
     - matchLabels:
         "io.kubernetes.pod.namespace": "envoy"
         "app": "envoy"

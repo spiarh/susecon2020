@@ -1,20 +1,16 @@
 ---
 title: 'Secure your application on SUSE CaaS Platform with Cilium'
+document: instructions
 author:
     - Ludovic Cavajani
     - Paul Gonin
 ---
 
+
 Prepare working environment
 ===========================
 
-
-Deploy Applications on CaaSP
-============================
-
-* Deploy MariaDB database
-* Deploy Prestashop application
-* Deploy NextCloud application
+See [DEPLOYMENT.md](./DEPLOYMENT.md) on how to prepare the environement.
 
 
 Network Policies - MariaDB
@@ -27,14 +23,47 @@ to filter on type of query, on which database, tables etc in the same manner how
 we can filter on methods and path with HTTP for example. But this will
 come soon as we have an engineer in SUSE working on this implementation !
 
-## Out first policy
+![](./susecon2020-mariadb.png)
 
-For our first policy we will only use L3.
+## Default policy
+
+Before we really start, let's apply a policy for all pods in the `mariadb` namespace
+which will deny absolutely all the traffic.
+
+Create a file `mariadb-deny-all.yaml`:
+
+```
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "deny-all"
+  namespace: mariadb
+spec:
+  endpointSelector:
+    matchLabels:
+      {}
+  egress:
+  - {}
+  ingress:
+  - {}
+```
+
+And Apply it in the cluster:
+
+```bash
+kubectl apply -f mariadb-deny-all.yaml
+```
+
+`Prestashop` and `Nextcloud` should be broken now :sad:
+
+
+## Our first policy
+
+Let's fix this with an other policy in which we will only use L3.
 
 The policy covers:
 * `L3 label-based`
-
-![](./susecon2020-mariadb.png)
 
 We can notice from the diagram above that the mariadb pod does not require any
 `egress` rule. We need to create `ingress` rules to whitelist access
@@ -43,7 +72,7 @@ from `4` external components.
 Note: In the real-world, it's very unlikely that we would expose mariadb
 through the frontend but this was just more convenient for the lab.
 
-Create a file `mariadb-l3.yaml`
+Create `mariadb-l3.yaml` and apply:
 
 ```yaml
 ---
@@ -75,11 +104,6 @@ spec:
         "app": "prometheus"
 ```
 
-And Apply it in the cluster:
-
-```bash
-kubectl apply -f mariadb-l3.yaml
-```
 
 Remember it is possible to see the network policies:
 
@@ -233,7 +257,7 @@ Connection to mariadb.mariadb.svc.cluster.local 3306 port [tcp/mysql] succeeded!
 It works !
 
 
-## A beefier policy
+## A finer policy
 
 In order to harden our first policy, we will add L4 and L7 filtering. For the purpose
 of the Labs, we will also use ServiceAccounts to match endpoints.
@@ -244,7 +268,7 @@ The policy covers:
 * `L7 HTTP`
 * `L7 Kubernetes ServiceAccount`
 
-Create `mariadb-full.yaml`:
+Create `mariadb-full.yaml` and apply:
 
 ```
 ---
