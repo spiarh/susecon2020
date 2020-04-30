@@ -1,9 +1,9 @@
 # Secure your applications on SUSE CaaS Platform with Cilium
 
 This repository stores all the content required to run the Lab
-`HOL-1410 Secure your app on CaaS Platform with Cilium`. It is originally
-made for SUSECON 2020 which was due to take place in Dublin but
-was unfortunately canceled due to COVID-19.
+`HOL-1410 Secure your app on SUSE CaaS Platform with Cilium`. It was
+originally made for SUSECON 2020 which was due to take place in Dublin
+but was unfortunately canceled due to COVID-19.
 
 Hopefully, we've adapted the Lab so it can be run on any
 `SUSE CaaS Platform v4.1.2` !
