@@ -1,21 +1,18 @@
 ---
 title: 'Secure your application on SUSE CaaS Platform with Cilium'
+document: instructions
 author:
     - Ludovic Cavajani
     - Paul Gonin
 ---
 
+![](susecon2020.png)
+
+
 Prepare working environment
 ===========================
 
-
-Deploy Applications on CaaSP
-============================
-
-* Deploy MariaDB database
-* Deploy Prestashop application
-* Deploy NextCloud application
-
+See [DEPLOYMENT.md](./DEPLOYMENT.md) on how to prepare the environement.
 
 Network Policies - MariaDB
 ========================
