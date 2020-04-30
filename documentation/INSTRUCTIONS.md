@@ -55,7 +55,7 @@ And Apply it in the cluster:
 kubectl apply -f mariadb-deny-all.yaml
 ```
 
-`Prestashop` and `Nextcloud` should be broken now :sad:
+`Prestashop` and `Nextcloud` should be broken now :cry:
 
 
 ## Our first policy
@@ -131,7 +131,7 @@ don't see traffic from envoy because we haven't generated any traffic.
 Let's do a quick test:
 
 ```bash
-mysql -u root -h 10.17.3.0 -psusecon -e quit
+mysql -u root -h 10.17.3.0 -p$PASSWORD -e quit
 ```
 
 Now we see the traffic originated from envoy:
@@ -235,7 +235,7 @@ $ tblshoot-loki
 / # nc -w 3 -v -z mariadb.mariadb.svc.cluster.local 3306
 nc: connect to mariadb.mariadb.svc.cluster.local port 3306 (tcp) timed out: Operation in progress
 
-/ # mysql --connect-timeout 3 -u root -psusecon -h mariadb.mariadb.svc.cluster.local -e quit
+/ # mysql --connect-timeout 3 -u root -p$PASSWORD -h mariadb.mariadb.svc.cluster.local -e quit
 ERROR 2002 (HY000): Can't connect to MySQL server on 'mariadb.mariadb.svc.cluster.local' (110)
 ```
 
@@ -251,7 +251,7 @@ $ tblshoot-prestashop
 / # nc -w 3 -v -z mariadb.mariadb.svc.cluster.local 3306
 Connection to mariadb.mariadb.svc.cluster.local 3306 port [tcp/mysql] succeeded!
 
-/ # mysql --connect-timeout 3 -u root -psusecon -h mariadb.mariadb.svc.cluster.local -e quit
+/ # mysql --connect-timeout 3 -u root -p$PASSWORD -h mariadb.mariadb.svc.cluster.local -e quit
 ```
 
 It works !

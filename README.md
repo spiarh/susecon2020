@@ -8,7 +8,7 @@ was unfortunately canceled due to COVID-19.
 Hopefully, we've adapted the Lab so it can be run on any
 `SUSE CaaS Platform v4.1.2` !
 
-1. Environment preparation
+1. **Environment preparation**
 
 In the following document [documentation/DEPLOYMENT.md](documentation/DEPLOYMENT.md),
 you can find all the information to deploy the environment.
@@ -17,7 +17,7 @@ Here is an overview:
 
 ![](documentation/susecon2020.png)
 
-2. Running the Lab
+2. **Running the Lab**
 
 Once you have the environment deployed, you'll find in the following document
 [documentation/INSTRUCTIONS.md](documentation/INSTRUCTIONS.md), all the
