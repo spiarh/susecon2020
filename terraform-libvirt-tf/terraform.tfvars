@@ -1,7 +1,7 @@
 # URL of the image to use
 # EXAMPLE:
 # image_uri = "SLE-15-SP1-JeOS-GMC"
-image_uri = "/root/SLES15-SP1-JeOS.x86_64-15.1-OpenStack-Cloud-Build36.3.1_kd.qcow2"
+image_uri = "/home/user/ISOs/SLES15-SP1-JeOS.x86_64-15.1-OpenStack-Cloud-Build36.3.1_kd.qcow2"
 
 # Identifier to make all your resources unique and avoid clashes with other users of this terraform project
 stack_name = "susecon"
@@ -28,7 +28,7 @@ username = "sles"
 
 # Password for the cluster nodes
 # EXAMPLE:
-password = "linux"
+password = "susecon"
 
 # define the repositories to use
 # EXAMPLE:
@@ -51,7 +51,7 @@ packages = [
 #  "ssh-rsa <key-content>"
 # ]
 authorized_keys = [
-  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFHUkbmn1u0EPaf1Nqnx8KSn9sfcgLxsaDSyPy+xmHJ1 lcavajani@suse.com"
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFHUkbmn1u0EPaf1Nqnx8KSn9sfcgLxsaDSyPy+xmHJ1"
 ]
 
 # IMPORTANT: Replace these ntp servers with ones from your infrastructure
