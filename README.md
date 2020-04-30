@@ -1,4 +1,4 @@
-# Secure your application on SUSE CaaS Platform with Cilium
+# Secure your applications on SUSE CaaS Platform with Cilium
 
 This repository stores all the content required to run the Lab
 `HOL-1410 Secure your app on CaaSP with Cilium`. It is originally

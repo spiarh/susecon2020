@@ -1,5 +1,5 @@
 ---
-title: 'Secure your application on SUSE CaaS Platform with Cilium'
+title: 'Secure your applications on SUSE CaaS Platform with Cilium'
 document: deployment
 author:
     - Ludovic Cavajani
