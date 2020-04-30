@@ -2,12 +2,12 @@
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
-  name: "allow-all-egress"
-  namespace: tblshoot
+  name: "allow-all"
+  namespace: default
 spec:
   endpointSelector:
     matchLabels:
-      app: tblshoot
+      {}
   egress:
   - toEndpoints
     - {}
