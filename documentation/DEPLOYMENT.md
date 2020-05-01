@@ -250,6 +250,7 @@ recommended to change the passwords.
 export PASSWORD=myNewSecuredPassword
 sed -i "s|password:.*|password: $PASSWORD|g" deployment/charts/mariadb-values.yaml deployment/charts/nextcloud-values.yaml deployment/charts/prestashop-values.yaml
 sed -i "s|prestashopPassword:.*|prestashopPassword: $PASSWORD|g" deployment/charts/prestashop-values.yaml
+sed -i "s|adminPassword:.*|adminPassword: $PASSWORD|g" deployment/charts/grafana-values.yaml
 sed -i "s|susecon|$PASSWORD|g" misc/mariadb.sql
 ```
 

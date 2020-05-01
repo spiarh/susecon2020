@@ -131,7 +131,7 @@ don't see traffic from envoy because we haven't generated any traffic.
 Let's do a quick test:
 
 ```bash
-mysql -u root -h 10.17.3.0 -p$PASSWORD -e quit
+mysql -u root -h mariadb.susecon.lab -p$PASSWORD -e quit
 ```
 
 Now we see the traffic originated from envoy:
