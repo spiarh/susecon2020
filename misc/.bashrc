@@ -7,7 +7,7 @@ function tblshoot-shell {
     extra_label=",$2"
   fi
 
-  kubectl -n "$1" exec -ti "$(kubectl -n "$1" get po -l role=tblshoot"$extra_label" -ojsonpath='{.items[0].metadata.name}')" sh
+  kubectl -n "$1" exec -ti "$(kubectl -n "$1" get po -l role=tblshoot"$extra_label" -ojsonpath='{.items[0].metadata.name}')" -- sh
 }
 
 alias deploy-tblshoot-pods='for e in $(ls ./tblshoot/overlays/); do kubectl kustomize "./tblshoot/overlays/$e" | kubectl apply -f -; done'
