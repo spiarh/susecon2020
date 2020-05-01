@@ -307,6 +307,7 @@ spec:
     - ports:
       - port: "3306"
         protocol: TCP
+  - fromEndpoints:
     - matchLabels:
         "io.kubernetes.pod.namespace": "monitoring"
         io.cilium.k8s.policy.serviceaccount: prometheus-server
@@ -314,10 +315,10 @@ spec:
       - ports:
         - port: "9104"
           protocol: TCP
-          rules:
-            http:
-            - method: "GET"
-              path: "/metrics"
+        rules:
+          http:
+          - method: "GET"
+            path: "/metrics"
 ```
 
 1. Nextcloud, Prestashop and envoy can only reach mariadb pod
