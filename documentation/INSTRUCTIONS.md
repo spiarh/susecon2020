@@ -204,7 +204,25 @@ Ingress verdict: allowed
 Final verdict: ALLOWED
 ```
 
-* Can we be reached from prometheus ?
+* Can we reach nextcloud ?
+
+```bash
+ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src-k8s-pod mariadb:mariadb-0 --dst any:app.kubernetes.io/instance=nextcloud,io.kubernetes.pod.namespace=nextcloud
+----------------------------------------------------------------
+Tracing From: [k8s:app=mariadb, k8s:chart=mariadb-7.3.5, k8s:component=master, k8s:io.cilium.k8s.policy.cluster=default, k8s:io.cilium.k8s.policy.serviceaccount=mariadb, k8s:io.kubernetes.pod.namespace=mariadb, k8s:release=mariadb, k8s:statefulset.kubernetes.io/pod-name=mariadb-0] => To: [any:app.kubernetes.io/instance=nextcloud, any:io.kubernetes.pod.namespace=nextcloud] Ports: [0/ANY]
+
+Resolving egress policy for [k8s:app=mariadb k8s:chart=mariadb-7.3.5 k8s:component=master k8s:io.cilium.k8s.policy.cluster=default k8s:io.cilium.k8s.policy.serviceaccount=mariadb k8s:io.kubernetes.pod.namespace=mariadb k8s:release=mariadb k8s:statefulset.kubernetes.io/pod-name=mariadb-0]
+* Rule {"matchLabels":{"k8s:io.kubernetes.pod.namespace":"mariadb"}}: selected
+* Rule {"matchLabels":{"any:app":"mariadb","k8s:io.kubernetes.pod.namespace":"mariadb"}}: selected
+2/2 rules selected
+Found no allow rule
+Egress verdict: denied
+
+
+Final verdict: DENIED
+```
+
+* Can we reached from prometheus ?
 
 ```bash
 $ kubectl -n kube-system exec -ti ds/cilium -- cilium policy trace --src any:app=prometheus,io.kubernetes.pod.namespace=monitoring --dst-k8s-pod mariadb:mariadb-0
@@ -582,7 +600,7 @@ for the other workloads !
 There can be of course several options sometimes and some of them can be better
 in a situation than an other. Considering that, you can find the policies we
 used to fully secure our workloads in the following directory
-[network-security-policies/](network-security-policies/)
+[network-security-policies/](../network-security-policies/)
 
 
 Have Fun !!!
