@@ -97,9 +97,8 @@ terraform apply -parallelism=1
 ```bash
 $ git clone https://github.com/suse/skuba
 $ cd skuba/
-$ git checkout release-caasp-4.1.2+backport.1
+$ git checkout release-caasp-4.2.1
 $ make release
-GO111MODULE=on go install -mod=vendor -ldflags "-X=github.com/SUSE/skuba/pkg/skuba.Version=1.2.2 -X=github.com/SUSE/skuba/pkg/skuba.BuildDate=20200416 -X=github.com/SUSE/skuba/pkg/skuba.Tag= -X=github.com/SUSE/skuba/pkg/skuba.ClosestTag=v1.2.2-3-gfcea4dae" -tags development ./cmd/...
 $ rm -f ~/go/bin/kubectl-caasp
 $ ln -s ~/go/bin/skuba /root/go/bin/kubectl-caasp
 ```
@@ -202,42 +201,6 @@ In order to avoid any disturbance, we need to disable node reboots:
 ```bash
 kubectl -n kube-system annotate ds kured weave.works/kured-node-lock='{"nodeID":"manual"}'
 ```
-
-
-### Upgrade cilium
-
-At this time, SUSE CaaSP Platform `4.2.0` ships version `1.5.3`
-which does not provide all the features require for the Lab.
-Hopefully, Cilium `1.6.6` will be introduced in version `4.3.0`, thus
-this step will not be required anymore.
-
-:warning: Replace `caasp-cluster` with the path to you cluster files.
-
-```bash
-kubectl delete -f caasp-cluster/addons/cilium/cilium.yaml
-kubectl apply -f deployment/prereq/cilium.yaml
-```
-
-:warning: Restarting `crio` service might be necessary if pod can't start
-
-Before deploying the Helm charts, we need to create some
-prerequisites in the clusters like namespaces etc. `metrics-servers`
-is deployed for convenience.
-
-```bash
-kubectl apply -f deployment/prereq
-kubectl apply -f deployment/prereq/metrics-server
-```
-
-Now we can use the command `top` with `kubectl`:
-
-```bash
-$ kubectl top node
-NAME               CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
-susecon-master-0   161m         8%     1487Mi          38%       
-susecon-worker-0   33m          1%     710Mi           18%
-```
-
 
 ### Parametrize charts
 
