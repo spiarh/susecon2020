@@ -5,6 +5,10 @@ service:
   name: envoy
   type: ClusterIP
   ports:
+    admin:
+      port: 9901
+      targetPort: admin
+      protocol: TCP
     n0:
       port: 80
       targetPort: n0
@@ -17,7 +21,6 @@ service:
       port: 3306
       targetPort: n2
       protocol: TCP
-
 ports:
   admin:
     containerPort: 9901
